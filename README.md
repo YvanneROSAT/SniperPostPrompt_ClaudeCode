@@ -1,4 +1,4 @@
-# Prompt Styler
+# Sniper Post Prompt (SPP)
 
 Une application moderne de création et d'export de prompts stylisés pour les réseaux sociaux et présentations.
 
