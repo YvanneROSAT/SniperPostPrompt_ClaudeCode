@@ -160,7 +160,9 @@ export default function PromptStyler() {
     
     setTimeout(() => {
       textarea.focus();
-      const newPosition = selectedText ? start + newText.substring(start).indexOf(selectedText) + selectedText.length : start + (needsNewLine ? 1 : 0) + listType.length;
+      const beforeCursorCheck = promptText.substring(0, start);
+      const needsNewLineCheck = beforeCursorCheck.length > 0 && !beforeCursorCheck.endsWith('\n');
+      const newPosition = selectedText ? start + newText.substring(start).indexOf(selectedText) + selectedText.length : start + (needsNewLineCheck ? 1 : 0) + listType.length;
       textarea.setSelectionRange(newPosition, newPosition);
     }, 0);
   };
@@ -211,7 +213,8 @@ export default function PromptStyler() {
       }
     } catch (error) {
       console.error('Erreur lors de l\'export:', error);
-      alert(`Erreur lors de l'export de l'image: ${error.message}`);
+      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
+      alert(`Erreur lors de l'export de l'image: ${errorMessage}`);
     }
   };
 
@@ -464,8 +467,10 @@ export default function PromptStyler() {
       {/* Section de paramètres et prévisualisation */}
       <div className="w-full lg:w-1/2 p-4 lg:p-6 flex flex-col min-h-[50vh] lg:min-h-screen">
         {/* Paramètres */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 mb-4">
-          <div className="space-y-2">
+        <div className="space-y-4 mb-4">
+          {/* Ligne 1 : Police, Arrière-plan, Style de carte */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="space-y-2">
             <h3 className="text-sm font-medium">Police</h3>
             <Select value={styleSettings.font} onValueChange={(value) => setStyleSettings(prev => ({ ...prev, font: value }))}>
               <SelectTrigger className="w-full">
@@ -511,89 +516,89 @@ export default function PromptStyler() {
                 ))}
               </SelectContent>
             </Select>
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <h3 className="text-sm font-medium">Taille police 16:9</h3>
-            <Select value={styleSettings.fontSize16_9} onValueChange={(value) => setStyleSettings(prev => ({ ...prev, fontSize16_9: value }))}>
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {FONT_SIZES_16_9.map((size) => (
-                  <SelectItem key={size.value} value={size.value}>
-                    {size.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <h3 className="text-sm font-medium">Taille police 9:16</h3>
-            <Select value={styleSettings.fontSize9_16} onValueChange={(value) => setStyleSettings(prev => ({ ...prev, fontSize9_16: value }))}>
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {FONT_SIZES_9_16.map((size) => (
-                  <SelectItem key={size.value} value={size.value}>
-                    {size.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <Separator className="col-span-full" />
-
-          <div className="grid grid-cols-2 gap-4 col-span-full">
+          {/* Ligne 2 : Tailles de police et Export format/type */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div className="space-y-2">
-              <h3 className="text-sm font-medium">Format</h3>
-              <ToggleGroup
-                type="single"
-                value={exportSettings.format}
-                onValueChange={(value) => value && setExportSettings(prev => ({ ...prev, format: value }))}
-                className="justify-start"
-              >
-                {EXPORT_FORMATS.map((format) => (
-                  <ToggleGroupItem key={format.value} value={format.value} className="text-xs px-3">
-                    {format.value}
+              <h3 className="text-sm font-medium">Taille police 16:9</h3>
+              <Select value={styleSettings.fontSize16_9} onValueChange={(value) => setStyleSettings(prev => ({ ...prev, fontSize16_9: value }))}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {FONT_SIZES_16_9.map((size) => (
+                    <SelectItem key={size.value} value={size.value}>
+                      {size.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium">Taille police 9:16</h3>
+              <Select value={styleSettings.fontSize9_16} onValueChange={(value) => setStyleSettings(prev => ({ ...prev, fontSize9_16: value }))}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {FONT_SIZES_9_16.map((size) => (
+                    <SelectItem key={size.value} value={size.value}>
+                      {size.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium">Format & Type</h3>
+              <div className="flex gap-2">
+                <ToggleGroup
+                  type="single"
+                  value={exportSettings.format}
+                  onValueChange={(value) => value && setExportSettings(prev => ({ ...prev, format: value }))}
+                  className="flex-1"
+                >
+                  {EXPORT_FORMATS.map((format) => (
+                    <ToggleGroupItem key={format.value} value={format.value} className="text-xs px-2 flex-1">
+                      {format.value}
+                    </ToggleGroupItem>
+                  ))}
+                </ToggleGroup>
+                <ToggleGroup
+                  type="single"
+                  value={exportSettings.fileType}
+                  onValueChange={(value) => value && setExportSettings(prev => ({ ...prev, fileType: value as 'png' | 'jpeg' }))}
+                  className="flex-1"
+                >
+                  <ToggleGroupItem value="png" className="text-xs px-2 flex-1">
+                    PNG
                   </ToggleGroupItem>
-                ))}
-              </ToggleGroup>
-            </div>
-
-            <div className="space-y-2">
-              <h3 className="text-sm font-medium">Type</h3>
-              <ToggleGroup
-                type="single"
-                value={exportSettings.fileType}
-                onValueChange={(value) => value && setExportSettings(prev => ({ ...prev, fileType: value as 'png' | 'jpeg' }))}
-                className="justify-start"
-              >
-                <ToggleGroupItem value="png" className="text-xs px-3">
-                  PNG
-                </ToggleGroupItem>
-                <ToggleGroupItem value="jpeg" className="text-xs px-3">
-                  JPEG
-                </ToggleGroupItem>
-              </ToggleGroup>
+                  <ToggleGroupItem value="jpeg" className="text-xs px-2 flex-1">
+                    JPEG
+                  </ToggleGroupItem>
+                </ToggleGroup>
+              </div>
             </div>
           </div>
-
-          <Button
-            onClick={exportToImage}
-            className="w-full col-span-full"
-            disabled={!promptText.trim()}
-          >
-            <Download className="h-4 w-4 mr-2" />
-            Exporter en {exportSettings.fileType.toUpperCase()}
-          </Button>
         </div>
 
+        <Separator />
+
+        <Button
+          onClick={exportToImage}
+          className="w-full"
+          disabled={!promptText.trim()}
+        >
+          <Download className="h-4 w-4 mr-2" />
+          Exporter en {exportSettings.fileType.toUpperCase()}
+        </Button>
+
         {/* Prévisualisation */}
-        <div className="flex-1 min-h-[300px] lg:min-h-[400px]">
+        <div className="flex-1 min-h-[300px] lg:min-h-[400px] mt-4">
           <div
             ref={previewRef}
             className={`${styleSettings.background} p-4 lg:p-8 flex items-center justify-center h-full rounded-lg`}
@@ -611,8 +616,8 @@ export default function PromptStyler() {
                 <div
                   className={`${styleSettings.font} ${
                     exportSettings.format === '9:16' 
-                      ? `${styleSettings.fontSize9_16} leading-relaxed` // Taille personnalisée pour 9:16
-                      : `${styleSettings.fontSize16_9} leading-relaxed` // Taille personnalisée pour 16:9
+                      ? styleSettings.fontSize9_16 + ' leading-relaxed' // Taille personnalisée pour 9:16
+                      : styleSettings.fontSize16_9 + ' leading-relaxed' // Taille personnalisée pour 16:9
                   }`}
                   dangerouslySetInnerHTML={{
                     __html: renderMarkdown(promptText || 'Votre prompt apparaîtra ici...')
