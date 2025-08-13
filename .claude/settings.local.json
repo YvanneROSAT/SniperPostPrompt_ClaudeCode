@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx create-next-app:*)",
+      "Bash(npx shadcn@2025 init:*)",
+      "Bash(npx shadcn@latest init:*)",
+      "Bash(npx shadcn@latest add:*)"
+    ],
+    "deny": []
+  }
+}
