@@ -173,7 +173,6 @@ export default function PromptStyler() {
 
     const start = textarea.selectionStart;
     const lines = promptText.substring(0, start).split('\n');
-    const currentLine = lines.length;
     
     // Compter uniquement les listes numérotées existantes
     const numberedItems = lines.filter(line => /^\d+\. /.test(line.trim())).length;
@@ -218,22 +217,22 @@ export default function PromptStyler() {
     }
   };
 
-  const exportToImage9_16 = async (formatConfig: any) => {
+  const exportToImage9_16 = async (formatConfig: { value: string; label: string; width: number; height: number }) => {
     // Créer un élément temporaire optimisé pour 9:16
     const tempContainer = document.createElement('div');
     tempContainer.style.position = 'fixed';
     tempContainer.style.top = '-9999px';
     tempContainer.style.left = '0';
-    tempContainer.style.width = '1080px';
-    tempContainer.style.height = '1920px';
+    tempContainer.style.width = `${formatConfig.width}px`;
+    tempContainer.style.height = `${formatConfig.height}px`;
     tempContainer.style.backgroundColor = 'transparent';
 
     // Cloner et optimiser le contenu pour 9:16
     const clonedPreview = previewRef.current!.cloneNode(true) as HTMLElement;
     
     // Styles optimisés pour 9:16
-    clonedPreview.style.width = '1080px';
-    clonedPreview.style.height = '1920px';
+    clonedPreview.style.width = `${formatConfig.width}px`;
+    clonedPreview.style.height = `${formatConfig.height}px`;
     clonedPreview.style.padding = '60px';
     clonedPreview.style.display = 'flex';
     clonedPreview.style.alignItems = 'center';
@@ -276,8 +275,8 @@ export default function PromptStyler() {
 
     // Capturer avec html2canvas
     const canvas = await html2canvas(tempContainer, {
-      width: 1080,
-      height: 1920,
+      width: formatConfig.width,
+      height: formatConfig.height,
       scale: 1,
       useCORS: true,
       allowTaint: true,
@@ -298,22 +297,22 @@ export default function PromptStyler() {
     link.click();
   };
 
-  const exportToImage16_9 = async (formatConfig: any) => {
+  const exportToImage16_9 = async (formatConfig: { value: string; label: string; width: number; height: number }) => {
     // LOGIQUE SPÉCIFIQUE 16:9 - Export natif optimisé
     const tempContainer = document.createElement('div');
     tempContainer.style.position = 'fixed';
     tempContainer.style.top = '-9999px';
     tempContainer.style.left = '0';
-    tempContainer.style.width = '1920px';
-    tempContainer.style.height = '1080px';
+    tempContainer.style.width = `${formatConfig.width}px`;
+    tempContainer.style.height = `${formatConfig.height}px`;
     tempContainer.style.backgroundColor = 'transparent';
 
     // Cloner et optimiser le contenu pour 16:9
     const clonedPreview = previewRef.current!.cloneNode(true) as HTMLElement;
     
     // Styles optimisés pour 16:9
-    clonedPreview.style.width = '1920px';
-    clonedPreview.style.height = '1080px';
+    clonedPreview.style.width = `${formatConfig.width}px`;
+    clonedPreview.style.height = `${formatConfig.height}px`;
     clonedPreview.style.padding = '60px';
     clonedPreview.style.display = 'flex';
     clonedPreview.style.alignItems = 'center';
@@ -356,8 +355,8 @@ export default function PromptStyler() {
 
     // Capturer avec html2canvas
     const canvas = await html2canvas(tempContainer, {
-      width: 1920,
-      height: 1080,
+      width: formatConfig.width,
+      height: formatConfig.height,
       scale: 1,
       useCORS: true,
       allowTaint: true,
