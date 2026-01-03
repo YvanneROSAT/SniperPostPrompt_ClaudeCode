@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { ThemeProvider } from "@/components/theme/theme-provider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,20 +14,20 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Prompt Styler - Créez des prompts stylisés",
-  description: "Créez et exportez des prompts stylisés pour vos réseaux sociaux et présentations. Personnalisez les polices, couleurs et formats d'export.",
+  title: "Prompt Styler - Creez des prompts stylises",
+  description: "Creez et exportez des prompts stylises pour vos reseaux sociaux et presentations. Personnalisez les polices, couleurs et formats d'export.",
   keywords: ["prompt", "styler", "social media", "design", "export", "image"],
   authors: [{ name: "Prompt Styler" }],
   openGraph: {
-    title: "Prompt Styler - Créez des prompts stylisés",
-    description: "Créez et exportez des prompts stylisés pour vos réseaux sociaux et présentations.",
+    title: "Prompt Styler - Creez des prompts stylises",
+    description: "Creez et exportez des prompts stylises pour vos reseaux sociaux et presentations.",
     type: "website",
     locale: "fr_FR",
   },
   twitter: {
     card: "summary_large_image",
     title: "Prompt Styler",
-    description: "Créez et exportez des prompts stylisés",
+    description: "Creez et exportez des prompts stylises",
   },
   robots: {
     index: true,
@@ -40,11 +41,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr">
+    <html lang="fr" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

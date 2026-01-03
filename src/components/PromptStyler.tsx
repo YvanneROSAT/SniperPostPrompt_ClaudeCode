@@ -11,6 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { Bold, Italic, Underline, Download, List, ListOrdered, Heading1, Heading2, Heading3 } from 'lucide-react';
 import html2canvas from 'html2canvas-pro';
 import DOMPurify from 'dompurify';
+import { ModeToggle } from '@/components/theme/mode-toggle';
 
 interface StyleSettings {
   font: string;
@@ -427,12 +428,13 @@ export default function PromptStyler() {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-screen w-full">
+    <div className="flex flex-col lg:flex-row min-h-screen w-full bg-background">
       {/* Section de saisie */}
-      <div className="w-full lg:w-1/2 p-4 lg:p-6 border-b lg:border-b-0 lg:border-r flex flex-col min-h-[50vh] lg:min-h-screen">
+      <div className="w-full lg:w-1/2 p-4 lg:p-6 border-b lg:border-b-0 lg:border-r border-border flex flex-col min-h-[50vh] lg:min-h-screen">
         <div className="flex-1 space-y-4">
-          <div className="flex items-center gap-1 mb-4 flex-wrap">
-            <Toggle
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-1 flex-wrap">
+              <Toggle
               pressed={false}
               onPressedChange={() => insertMarkdown('**')}
               aria-label="Bold"
@@ -496,6 +498,8 @@ export default function PromptStyler() {
             >
               <Heading3 className="h-4 w-4" />
             </Toggle>
+            </div>
+            <ModeToggle />
           </div>
 
           <Textarea
