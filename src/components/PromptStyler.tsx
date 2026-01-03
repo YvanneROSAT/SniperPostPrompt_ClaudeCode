@@ -10,6 +10,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Bold, Italic, Underline, Download, List, ListOrdered, Heading1, Heading2, Heading3 } from 'lucide-react';
 import html2canvas from 'html2canvas-pro';
+import DOMPurify from 'dompurify';
 
 interface StyleSettings {
   font: string;
@@ -92,18 +93,43 @@ export default function PromptStyler() {
 
   useEffect(() => {
     setMounted(true);
-    const savedData = localStorage.getItem('prompt-styler-data');
-    if (savedData) {
-      const { promptText: savedText, styleSettings: savedSettings } = JSON.parse(savedData);
-      setPromptText(savedText || '');
-      setStyleSettings(savedSettings || {
-        font: 'font-sans',
-        background: 'bg-gradient-to-br from-blue-400 to-purple-600',
-        cardStyle: 'bg-white shadow-xl border-0 rounded-2xl',
-        title: '',
-        fontSize16_9: 'text-xl',
-        fontSize9_16: 'text-3xl'
-      });
+    try {
+      const savedData = localStorage.getItem('prompt-styler-data');
+      if (savedData) {
+        const parsed = JSON.parse(savedData);
+
+        // Validate parsed data structure
+        if (typeof parsed === 'object' && parsed !== null) {
+          const { promptText: savedText, styleSettings: savedSettings } = parsed;
+
+          // Validate promptText is a string
+          if (typeof savedText === 'string') {
+            setPromptText(savedText);
+          }
+
+          // Validate styleSettings structure
+          if (savedSettings && typeof savedSettings === 'object') {
+            const validFonts = FONT_STYLES.map(f => f.value);
+            const validBackgrounds = BACKGROUND_STYLES.map(b => b.value);
+            const validCardStyles = CARD_STYLES.map(c => c.value);
+            const validFontSizes16_9 = FONT_SIZES_16_9.map(s => s.value);
+            const validFontSizes9_16 = FONT_SIZES_9_16.map(s => s.value);
+
+            setStyleSettings({
+              font: validFonts.includes(savedSettings.font) ? savedSettings.font : 'font-sans',
+              background: validBackgrounds.includes(savedSettings.background) ? savedSettings.background : 'bg-gradient-to-br from-blue-400 to-purple-600',
+              cardStyle: validCardStyles.includes(savedSettings.cardStyle) ? savedSettings.cardStyle : 'bg-white shadow-xl border-0 rounded-2xl',
+              title: typeof savedSettings.title === 'string' ? savedSettings.title : '',
+              fontSize16_9: validFontSizes16_9.includes(savedSettings.fontSize16_9) ? savedSettings.fontSize16_9 : 'text-xl',
+              fontSize9_16: validFontSizes9_16.includes(savedSettings.fontSize9_16) ? savedSettings.fontSize9_16 : 'text-3xl'
+            });
+          }
+        }
+      }
+    } catch {
+      // If localStorage data is corrupted, clear it and use defaults
+      localStorage.removeItem('prompt-styler-data');
+      console.warn('Corrupted localStorage data cleared');
     }
   }, []);
 
@@ -182,7 +208,21 @@ export default function PromptStyler() {
   };
 
   const renderMarkdown = (text: string) => {
-    return text
+    // Escape HTML first to prevent XSS attacks
+    const escapeHtml = (str: string) => {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    };
+
+    // Escape the input first
+    const escapedText = escapeHtml(text);
+
+    // Apply markdown transformations on escaped text
+    const html = escapedText
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.*?)\*/g, '<em>$1</em>')
       .replace(/_(.*?)_/g, '<u>$1</u>')
@@ -192,6 +232,12 @@ export default function PromptStyler() {
       .replace(/^(\d+\. .+)$/gm, '<div style="margin-left: 20px;">$1</div>')
       .replace(/^(• .+)$/gm, '<div style="margin-left: 20px;">$1</div>')
       .replace(/\n/g, '<br>');
+
+    // Sanitize with DOMPurify as additional security layer
+    return DOMPurify.sanitize(html, {
+      ALLOWED_TAGS: ['strong', 'em', 'u', 'h1', 'h2', 'h3', 'div', 'br'],
+      ALLOWED_ATTR: ['style']
+    });
   };
 
   const exportToImage = async () => {
@@ -212,8 +258,7 @@ export default function PromptStyler() {
       }
     } catch (error) {
       console.error('Erreur lors de l\'export:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Erreur inconnue';
-      alert(`Erreur lors de l'export de l'image: ${errorMessage}`);
+      alert('Une erreur est survenue lors de l\'export. Veuillez réessayer.');
     }
   };
 
