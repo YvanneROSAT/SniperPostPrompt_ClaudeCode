@@ -62,17 +62,26 @@ export function AdBanner({
     return null;
   }
 
+  const isDev = process.env.NODE_ENV === 'development';
+
   return (
-    <div className={`ad-container ${className}`}>
-      <ins
-        ref={adRef}
-        className="adsbygoogle"
-        style={{ display: 'block' }}
-        data-ad-client={clientId}
-        data-ad-slot={slot}
-        data-ad-format={format}
-        data-full-width-responsive="true"
-      />
+    <div className={`ad-container overflow-hidden ${className}`}>
+      {isDev ? (
+        // Placeholder visuel en développement
+        <div className="w-full h-[90px] bg-muted/30 border border-dashed border-border rounded flex items-center justify-center text-xs text-muted-foreground">
+          📢 Espace publicitaire (visible en production)
+        </div>
+      ) : (
+        <ins
+          ref={adRef}
+          className="adsbygoogle"
+          style={{ display: 'block', width: '100%', height: '90px' }}
+          data-ad-client={clientId}
+          data-ad-slot={slot}
+          data-ad-format={format}
+          data-full-width-responsive="false"
+        />
+      )}
     </div>
   );
 }
