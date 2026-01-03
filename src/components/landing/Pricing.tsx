@@ -23,7 +23,7 @@ const plans = [
   {
     name: 'Premium',
     price: '5',
-    description: 'Pour une experience optimale',
+    description: 'Soutenez le projet et profitez pleinement',
     icon: Crown,
     features: [
       { text: 'Toutes les fonctionnalites', included: true },
@@ -31,6 +31,7 @@ const plans = [
       { text: 'Tous les formats', included: true },
       { text: 'Sans publicites', included: true },
       { text: 'Support prioritaire', included: true },
+      { text: 'Soutien a la maintenance du serveur', included: true },
     ],
     cta: "S'abonner",
     href: '#checkout',
