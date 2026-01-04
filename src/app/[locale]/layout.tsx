@@ -20,7 +20,11 @@ import {
   Fira_Code
 } from "next/font/google";
 import { ThemeProvider } from "@/components/theme/theme-provider";
-import "./globals.css";
+import { NextIntlClientProvider, hasLocale } from 'next-intl';
+import { notFound } from 'next/navigation';
+import { routing } from '@/i18n/routing';
+import { getMessages } from 'next-intl/server';
+import "../globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -61,7 +65,6 @@ export const metadata: Metadata = {
     title: "Prompt Styler - Creez des prompts stylises",
     description: "Creez et exportez des prompts stylises pour vos reseaux sociaux et presentations.",
     type: "website",
-    locale: "fr_FR",
   },
   twitter: {
     card: "summary_large_image",
@@ -74,15 +77,23 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
+type Props = {
   children: React.ReactNode;
-}>) {
+  params: Promise<{locale: string}>;
+};
+
+export default async function LocaleLayout({children, params}: Props) {
+  const {locale} = await params;
+
+  if (!hasLocale(routing.locales, locale)) {
+    notFound();
+  }
+
+  const messages = await getMessages();
+
   return (
-    <html lang="fr" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <head>
-        {/* Google AdSense - lazyOnload pour ne pas interférer avec le layout initial */}
         <Script
           async
           src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID}`}
@@ -99,7 +110,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <NextIntlClientProvider locale={locale} messages={messages}>
+            {children}
+          </NextIntlClientProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -1,45 +1,13 @@
 'use client';
 
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { Button } from '@/components/ui/button';
 import { Check, X, Crown, Zap } from 'lucide-react';
-
-const plans = [
-  {
-    name: 'Gratuit',
-    price: '0',
-    description: 'Pour commencer et decouvrir',
-    icon: Zap,
-    features: [
-      { text: 'Toutes les fonctionnalites', included: true },
-      { text: 'Export illimite', included: true },
-      { text: 'Tous les formats', included: true },
-      { text: 'Publicites affichees', included: false },
-    ],
-    cta: 'Commencer',
-    href: '/app',
-    popular: false,
-  },
-  {
-    name: 'Premium',
-    price: '5',
-    description: 'Soutenez le projet et profitez pleinement',
-    icon: Crown,
-    features: [
-      { text: 'Toutes les fonctionnalites', included: true },
-      { text: 'Export illimite', included: true },
-      { text: 'Tous les formats', included: true },
-      { text: 'Sans publicites', included: true },
-      { text: 'Support prioritaire', included: true },
-      { text: 'Soutien a la maintenance du serveur', included: true },
-    ],
-    cta: "S'abonner",
-    href: '#checkout',
-    popular: true,
-  },
-];
+import { useTranslations } from 'next-intl';
 
 export function Pricing() {
+  const t = useTranslations('Pricing');
+
   const handleCheckout = async () => {
     try {
       const response = await fetch('/api/checkout', {
@@ -56,16 +24,51 @@ export function Pricing() {
     }
   };
 
+  const plans = [
+    {
+      name: t('free.name'),
+      price: t('free.price'),
+      description: t('free.description'),
+      icon: Zap,
+      features: [
+        { text: t('free.feature1'), included: true },
+        { text: t('free.feature2'), included: true },
+        { text: t('free.feature3'), included: true },
+        { text: t('free.feature4'), included: false },
+      ],
+      cta: t('free.cta'),
+      href: '/app',
+      popular: false,
+    },
+    {
+      name: t('premium.name'),
+      price: t('premium.price'),
+      description: t('premium.description'),
+      icon: Crown,
+      features: [
+        { text: t('premium.feature1'), included: true },
+        { text: t('premium.feature2'), included: true },
+        { text: t('premium.feature3'), included: true },
+        { text: t('premium.feature4'), included: true },
+        { text: t('premium.feature5'), included: true },
+        { text: t('premium.feature6'), included: true },
+      ],
+      cta: t('premium.cta'),
+      href: '#checkout',
+      popular: true,
+    },
+  ];
+
   return (
     <section id="pricing" className="py-24 sm:py-32">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center space-y-4 mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
-            Tarifs simples et transparents
+            {t('title')}
           </h2>
           <p className="max-w-2xl mx-auto text-lg text-muted-foreground">
-            Commencez gratuitement, passez a Premium quand vous le souhaitez.
+            {t('subtitle')}
           </p>
         </div>
 
@@ -84,7 +87,7 @@ export function Pricing() {
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2">
                   <span className="inline-flex items-center gap-1 px-4 py-1 rounded-full bg-primary text-primary-foreground text-sm font-medium">
                     <Crown className="h-3.5 w-3.5" />
-                    Populaire
+                    {t('popular')}
                   </span>
                 </div>
               )}
@@ -103,7 +106,7 @@ export function Pricing() {
 
               <div className="flex items-baseline gap-1 mb-6">
                 <span className="text-4xl font-bold text-foreground">{plan.price}EUR</span>
-                {plan.price !== '0' && <span className="text-muted-foreground">/mois</span>}
+                {plan.price !== '0' && <span className="text-muted-foreground">{t('perMonth')}</span>}
               </div>
 
               <ul className="space-y-3 mb-8">
@@ -145,7 +148,7 @@ export function Pricing() {
 
         {/* FAQ or note */}
         <p className="text-center text-sm text-muted-foreground mt-12">
-          Annulez a tout moment. Pas d&apos;engagement.
+          {t('cancel')}
         </p>
       </div>
     </section>

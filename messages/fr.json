@@ -1,0 +1,59 @@
+{
+  "Hero": {
+    "badge": "Simple, rapide, efficace",
+    "title": "Creez des prompts stylises",
+    "titleHighlight": "en quelques clics",
+    "subtitle": "Concevez et exportez des visuels professionnels pour vos reseaux sociaux et presentations. Personnalisez les polices, couleurs et formats.",
+    "cta": "Commencer gratuitement",
+    "ctaSecondary": "Voir les tarifs",
+    "socialProof": "Gratuit pour commencer - Sans carte bancaire",
+    "preview": "Votre prompt apparaitra ici avec le style de votre choix..."
+  },
+  "Features": {
+    "title": "Tout ce dont vous avez besoin",
+    "subtitle": "Des outils simples et puissants pour creer des visuels professionnels en quelques secondes.",
+    "exportTitle": "Export Multi-formats",
+    "exportDesc": "Exportez en 16:9 ou 9:16 pour tous vos reseaux sociaux et presentations.",
+    "markdownTitle": "Mise en forme Markdown",
+    "markdownDesc": "Gras, italique, titres, listes... formatez facilement votre contenu.",
+    "customTitle": "Personnalisation complete",
+    "customDesc": "Polices, couleurs, arrieres-plans personnalisables a votre image.",
+    "darkModeTitle": "Mode Sombre",
+    "darkModeDesc": "Interface adaptee a vos preferences avec support du theme systeme."
+  },
+  "Pricing": {
+    "title": "Tarifs simples et transparents",
+    "subtitle": "Commencez gratuitement, passez a Premium quand vous le souhaitez.",
+    "popular": "Populaire",
+    "perMonth": "/mois",
+    "cancel": "Annulez a tout moment. Pas d'engagement.",
+    "free": {
+      "name": "Gratuit",
+      "price": "0",
+      "description": "Pour commencer et decouvrir",
+      "cta": "Commencer",
+      "feature1": "Toutes les fonctionnalites",
+      "feature2": "Export illimite",
+      "feature3": "Tous les formats",
+      "feature4": "Publicites affichees"
+    },
+    "premium": {
+      "name": "Premium",
+      "price": "5",
+      "description": "Soutenez le projet et profitez pleinement",
+      "cta": "S'abonner",
+      "feature1": "Toutes les fonctionnalites",
+      "feature2": "Export illimite",
+      "feature3": "Tous les formats",
+      "feature4": "Sans publicites",
+      "feature5": "Support prioritaire",
+      "feature6": "Soutien a la maintenance du serveur"
+    }
+  },
+  "Footer": {
+    "app": "Application",
+    "features": "Fonctionnalites",
+    "pricing": "Tarifs",
+    "copyright": "Tous droits reserves."
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "Hero": {
+    "badge": "Simple, fast, effective",
+    "title": "Create stylized prompts",
+    "titleHighlight": "in just a few clicks",
+    "subtitle": "Design and export professional visuals for your social media and presentations. Customize fonts, colors and formats.",
+    "cta": "Start for free",
+    "ctaSecondary": "View pricing",
+    "socialProof": "Free to start - No credit card required",
+    "preview": "Your prompt will appear here with your chosen style..."
+  },
+  "Features": {
+    "title": "Everything you need",
+    "subtitle": "Simple and powerful tools to create professional visuals in seconds.",
+    "exportTitle": "Multi-format Export",
+    "exportDesc": "Export in 16:9 or 9:16 for all your social media and presentations.",
+    "markdownTitle": "Markdown Formatting",
+    "markdownDesc": "Bold, italic, headings, lists... easily format your content.",
+    "customTitle": "Full Customization",
+    "customDesc": "Fonts, colors, backgrounds customizable to your brand.",
+    "darkModeTitle": "Dark Mode",
+    "darkModeDesc": "Interface adapted to your preferences with system theme support."
+  },
+  "Pricing": {
+    "title": "Simple and transparent pricing",
+    "subtitle": "Start for free, upgrade to Premium whenever you want.",
+    "popular": "Popular",
+    "perMonth": "/month",
+    "cancel": "Cancel anytime. No commitment.",
+    "free": {
+      "name": "Free",
+      "price": "0",
+      "description": "To get started and discover",
+      "cta": "Get Started",
+      "feature1": "All features",
+      "feature2": "Unlimited exports",
+      "feature3": "All formats",
+      "feature4": "Ads displayed"
+    },
+    "premium": {
+      "name": "Premium",
+      "price": "5",
+      "description": "Support the project and enjoy fully",
+      "cta": "Subscribe",
+      "feature1": "All features",
+      "feature2": "Unlimited exports",
+      "feature3": "All formats",
+      "feature4": "Ad-free",
+      "feature5": "Priority support",
+      "feature6": "Server maintenance support"
+    }
+  },
+  "Footer": {
+    "app": "Application",
+    "features": "Features",
+    "pricing": "Pricing",
+    "copyright": "All rights reserved."
+  }
+}

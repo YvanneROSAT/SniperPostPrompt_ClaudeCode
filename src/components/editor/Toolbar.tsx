@@ -2,10 +2,16 @@
 
 import { Button } from '@/components/ui/button';
 import { ModeToggle } from '@/components/theme/mode-toggle';
-import { Download, Sparkles } from 'lucide-react';
+import { Download, Sparkles, ChevronDown } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface ToolbarProps {
-  onExport: () => void;
+  onExport: (quality: '1x' | '2x') => void;
   canExport: boolean;
   exportFormat: string;
 }
@@ -28,15 +34,33 @@ export function Toolbar({
       {/* Right Actions */}
       <div className="flex items-center gap-2">
         <ModeToggle />
-        <Button
-          onClick={onExport}
-          disabled={!canExport}
-          size="sm"
-          className="gap-2"
-        >
-          <Download className="h-4 w-4" />
-          <span className="hidden sm:inline">Exporter {exportFormat}</span>
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              disabled={!canExport}
+              size="sm"
+              className="gap-2"
+            >
+              <Download className="h-4 w-4" />
+              <span className="hidden sm:inline">Exporter {exportFormat}</span>
+              <ChevronDown className="h-3 w-3" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => onExport('1x')}>
+              <span className="font-medium">1080P</span>
+              <span className="ml-2 text-xs text-muted-foreground">
+                {exportFormat === '16:9' ? '1920x1080' : '1080x1920'}
+              </span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => onExport('2x')}>
+              <span className="font-medium">4K</span>
+              <span className="ml-2 text-xs text-muted-foreground">
+                {exportFormat === '16:9' ? '3840x2160' : '2160x3840'}
+              </span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   );

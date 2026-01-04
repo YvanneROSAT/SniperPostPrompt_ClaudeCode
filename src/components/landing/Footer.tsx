@@ -1,9 +1,12 @@
 'use client';
 
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { ModeToggle } from '@/components/theme/mode-toggle';
+import { useTranslations } from 'next-intl';
 
 export function Footer() {
+  const t = useTranslations('Footer');
+
   return (
     <footer className="border-t border-border bg-muted/30">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -19,13 +22,13 @@ export function Footer() {
           {/* Links */}
           <nav className="flex items-center gap-6 text-sm text-muted-foreground">
             <Link href="/app" className="hover:text-foreground transition-colors">
-              Application
+              {t('app')}
             </Link>
             <Link href="#features" className="hover:text-foreground transition-colors">
-              Fonctionnalites
+              {t('features')}
             </Link>
             <Link href="#pricing" className="hover:text-foreground transition-colors">
-              Tarifs
+              {t('pricing')}
             </Link>
           </nav>
 
@@ -37,7 +40,7 @@ export function Footer() {
 
         {/* Copyright */}
         <div className="mt-8 pt-8 border-t border-border text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} Prompt Styler. Tous droits reserves.</p>
+          <p>&copy; {new Date().getFullYear()} Prompt Styler. {t('copyright')}</p>
         </div>
       </div>
     </footer>
