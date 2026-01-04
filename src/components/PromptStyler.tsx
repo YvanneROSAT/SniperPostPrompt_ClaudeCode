@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Toggle } from '@/components/ui/toggle';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import html2canvas from 'html2canvas-pro';
+// Import dynamique de dom-to-image-more (client-side only)
 import DOMPurify from 'dompurify';
 import { Toolbar } from '@/components/editor/Toolbar';
 import { AdBanner } from '@/components/ads/AdBanner';
@@ -59,6 +59,8 @@ const FONT_STYLES = [
 ];
 
 const FONT_SIZES_16_9 = [
+  { value: 'text-[10px]', label: 'Minuscule (10px)' },
+  { value: 'text-xs', label: 'Tres Petit (12px)' },
   { value: 'text-sm', label: 'Petit (14px)' },
   { value: 'text-base', label: 'Normal (16px)' },
   { value: 'text-lg', label: 'Large (18px)' },
@@ -70,14 +72,17 @@ const FONT_SIZES_16_9 = [
 ];
 
 const FONT_SIZES_9_16 = [
-  { value: 'text-base', label: 'Petit (16px)' },
-  { value: 'text-lg', label: 'Normal (18px)' },
-  { value: 'text-xl', label: 'Large (20px)' },
-  { value: 'text-2xl', label: 'Tres Large (24px)' },
-  { value: 'text-3xl', label: 'XXL (30px)' },
-  { value: 'text-4xl', label: 'XXXL (36px)' },
-  { value: 'text-5xl', label: 'Enorme (48px)' },
-  { value: 'text-6xl', label: 'Gigantesque (60px)' }
+  { value: 'text-[10px]', label: 'Minuscule (10px)' },
+  { value: 'text-xs', label: 'Tres Petit (12px)' },
+  { value: 'text-sm', label: 'Petit (14px)' },
+  { value: 'text-base', label: 'Normal (16px)' },
+  { value: 'text-lg', label: 'Large (18px)' },
+  { value: 'text-xl', label: 'Tres Large (20px)' },
+  { value: 'text-2xl', label: 'XXL (24px)' },
+  { value: 'text-3xl', label: 'XXXL (30px)' },
+  { value: 'text-4xl', label: 'Enorme (36px)' },
+  { value: 'text-5xl', label: 'Gigantesque (48px)' },
+  { value: 'text-6xl', label: 'Titanesque (60px)' }
 ];
 
 const BACKGROUND_STYLES = [
@@ -313,6 +318,77 @@ export default function PromptStyler() {
     insertList(`${nextNumber}. `);
   };
 
+  // Gestion du comportement liste style Notion
+  const handleTextareaKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key !== 'Enter') return;
+
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+
+    // Ne pas interférer si du texte est sélectionné
+    if (start !== end) return;
+
+    // Trouver la ligne actuelle
+    const textBefore = promptText.substring(0, start);
+    const lastNewLine = textBefore.lastIndexOf('\n');
+    const currentLine = textBefore.substring(lastNewLine + 1);
+
+    // Vérifier si c'est une liste à puces
+    const bulletMatch = currentLine.match(/^(• )(.*)$/);
+    if (bulletMatch) {
+      e.preventDefault();
+      const content = bulletMatch[2];
+
+      if (content.trim() === '') {
+        // Liste vide → supprimer le préfixe et sortir de la liste
+        const newText = promptText.substring(0, start - 2) + promptText.substring(start);
+        setPromptText(newText);
+        setTimeout(() => {
+          textarea.setSelectionRange(start - 2, start - 2);
+        }, 0);
+      } else {
+        // Contenu présent → créer nouvel item
+        const newText = promptText.substring(0, start) + '\n• ' + promptText.substring(start);
+        setPromptText(newText);
+        setTimeout(() => {
+          textarea.setSelectionRange(start + 3, start + 3);
+        }, 0);
+      }
+      return;
+    }
+
+    // Vérifier si c'est une liste numérotée
+    const numberedMatch = currentLine.match(/^(\d+)\. (.*)$/);
+    if (numberedMatch) {
+      e.preventDefault();
+      const num = parseInt(numberedMatch[1]);
+      const content = numberedMatch[2];
+
+      if (content.trim() === '') {
+        // Liste vide → supprimer le préfixe et sortir de la liste
+        const prefixLength = `${num}. `.length;
+        const newText = promptText.substring(0, start - prefixLength) + promptText.substring(start);
+        setPromptText(newText);
+        setTimeout(() => {
+          textarea.setSelectionRange(start - prefixLength, start - prefixLength);
+        }, 0);
+      } else {
+        // Contenu présent → créer nouvel item avec numéro suivant
+        const nextNum = num + 1;
+        const newText = promptText.substring(0, start) + `\n${nextNum}. ` + promptText.substring(start);
+        const newPos = start + `\n${nextNum}. `.length;
+        setPromptText(newText);
+        setTimeout(() => {
+          textarea.setSelectionRange(newPos, newPos);
+        }, 0);
+      }
+      return;
+    }
+  };
+
   const renderMarkdown = (text: string) => {
     // Escape HTML first to prevent XSS attacks
     const escapeHtml = (str: string) => {
@@ -334,12 +410,16 @@ export default function PromptStyler() {
       .replace(/_(.*?)_/g, '<u>$1</u>')
       .replace(/~~(.*?)~~/g, '<del>$1</del>')
       .replace(/`([^`]+)`/g, '<code style="background: rgba(0,0,0,0.1); padding: 0.1em 0.3em; border-radius: 3px; font-family: monospace;">$1</code>')
-      .replace(/^### (.+)$/gm, '<h3 style="font-size: 1.1em; font-weight: 600; margin: 0.15em 0;">$1</h3>')
-      .replace(/^## (.+)$/gm, '<h2 style="font-size: 1.25em; font-weight: 700; margin: 0.2em 0;">$1</h2>')
-      .replace(/^# (.+)$/gm, '<h1 style="font-size: 1.5em; font-weight: 800; margin: 0.25em 0;">$1</h1>')
-      .replace(/^(\d+\. .+)$/gm, '<div style="margin-left: 16px;">$1</div>')
-      .replace(/^(• .+)$/gm, '<div style="margin-left: 16px;">$1</div>')
-      .replace(/\n/g, '<br>');
+      .replace(/^### (.+)$/gm, '<h3 style="font-size: 1.1em; font-weight: 600; margin-top: 0.15em; margin-bottom: 0.1em;">$1</h3>')
+      .replace(/^## (.+)$/gm, '<h2 style="font-size: 1.25em; font-weight: 700; margin-top: 0.2em; margin-bottom: 0.125em;">$1</h2>')
+      .replace(/^# (.+)$/gm, '<h1 style="font-size: 1.5em; font-weight: 800; margin-top: 0.25em; margin-bottom: 0.15em;">$1</h1>')
+      .replace(/^(\d+\. .+)$/gm, '<div style="margin-left: 16px; margin-top: 0.05em; margin-bottom: 0.05em;">$1</div>')
+      .replace(/^(• .+)$/gm, '<div style="margin-left: 16px; margin-top: 0.05em; margin-bottom: 0.05em;">$1</div>')
+      .replace(/\n/g, '<br>')
+      // Supprimer les <br> après les éléments block pour éviter double espacement
+      .replace(/<\/(h1|h2|h3|div)><br>/g, '</$1>')
+      // Supprimer les <br> avant les éléments block
+      .replace(/<br><(h1|h2|h3|div)/g, '<$1');
 
     // Sanitize with DOMPurify as additional security layer
     return DOMPurify.sanitize(html, {
@@ -348,218 +428,151 @@ export default function PromptStyler() {
     });
   };
 
-  const exportToImage = async () => {
+  const exportToImage = async (quality: '1x' | '2x' = '1x') => {
     if (!previewRef.current) return;
 
     const formatConfig = EXPORT_FORMATS.find(f => f.value === exportSettings.format);
     if (!formatConfig) return;
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Import dynamique (client-side only)
+      const domtoimage = (await import('dom-to-image-more')).default;
 
-      if (exportSettings.format === '9:16') {
-        // LOGIQUE SPECIFIQUE 9:16 - Export natif sans deformation
-        await exportToImage9_16(formatConfig);
-      } else {
-        // LOGIQUE 16:9 - Logique existante maintenue
-        await exportToImage16_9(formatConfig);
+      const scale = quality === '2x' ? 2 : 1;
+      const { width, height } = formatConfig;
+
+      // Creer un conteneur temporaire avec les dimensions exactes d'export
+      const tempContainer = document.createElement('div');
+      tempContainer.style.cssText = `
+        position: fixed;
+        top: -9999px;
+        left: 0;
+        width: ${width}px;
+        height: ${height}px;
+        overflow: hidden;
+        pointer-events: none;
+      `;
+
+      // Cloner le preview (BG gradient + card)
+      const clonedPreview = previewRef.current.cloneNode(true) as HTMLElement;
+
+      // Adapter le clone aux dimensions d'export
+      // Padding different selon le format: 9:16 = 5% vertical, 5% horizontal, 16:9 = 5% partout
+      const paddingStyle = exportSettings.format === '9:16'
+        ? 'padding: 5% 5%;'  // 5% partout pour 9:16
+        : 'padding: 5%;';   // 5% partout pour 16:9
+      clonedPreview.style.cssText = `
+        width: ${width}px;
+        height: ${height}px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        ${paddingStyle}
+        box-sizing: border-box;
+      `;
+      // Conserver le background gradient
+      clonedPreview.className = previewRef.current.className;
+
+      // Supprimer tous les scrollbars, focus, outlines et bordures sur tous les elements
+      const allElements = clonedPreview.querySelectorAll('*');
+      allElements.forEach((el) => {
+        const htmlEl = el as HTMLElement;
+        htmlEl.style.outline = 'none';
+        htmlEl.style.border = 'none';
+        htmlEl.style.borderLeft = 'none';
+        htmlEl.style.borderRight = 'none';
+        htmlEl.style.borderTop = 'none';
+        htmlEl.style.borderBottom = 'none';
+        htmlEl.style.boxShadow = htmlEl.style.boxShadow?.includes('shadow') ? htmlEl.style.boxShadow : 'none';
+        // Supprimer les scrollbars
+        if (htmlEl.scrollHeight > htmlEl.clientHeight || htmlEl.scrollWidth > htmlEl.clientWidth) {
+          htmlEl.style.overflow = 'hidden';
+        }
+        // Enlever focus rings
+        htmlEl.blur?.();
+      });
+
+      // Trouver et ajuster la card
+      const card = clonedPreview.querySelector('[data-slot="card"], .rounded-2xl, .rounded-xl, .rounded-lg, .rounded-3xl') as HTMLElement;
+      if (card) {
+        // Garder les styles de card mais supprimer overflow et bordures
+        // IMPORTANT: forcer width (pas juste maxWidth) car la classe Tailwind w-[56.25%] est clonée
+        card.style.overflow = 'hidden';
+        card.style.maxHeight = '90%';
+        card.style.width = exportSettings.format === '9:16' ? '80%' : '85%';
+        card.style.maxWidth = 'none';
+        card.style.outline = 'none';
+        card.style.border = 'none';
       }
+
+      // Trouver le CardContent et ajuster
+      const cardContent = clonedPreview.querySelector('[data-slot="card-content"], .p-6') as HTMLElement;
+      if (cardContent) {
+        cardContent.style.overflow = 'hidden';
+        cardContent.style.scrollbarWidth = 'none';
+      }
+
+      // Ajuster la taille du texte pour l'export
+      const textContainer = clonedPreview.querySelector('[class*="font-"]') as HTMLElement;
+      if (textContainer) {
+        // Taille de base selon le format
+        const baseFontSize = exportSettings.format === '9:16' ? 28 : 22;
+        textContainer.style.fontSize = `${baseFontSize}px`;
+        textContainer.style.lineHeight = '1.5';
+
+        // Ajuster les headings
+        const headings = textContainer.querySelectorAll('h1, h2, h3');
+        headings.forEach((heading) => {
+          const el = heading as HTMLElement;
+          if (el.tagName === 'H1') {
+            el.style.fontSize = `${baseFontSize * 1.6}px`;
+          } else if (el.tagName === 'H2') {
+            el.style.fontSize = `${baseFontSize * 1.4}px`;
+          } else if (el.tagName === 'H3') {
+            el.style.fontSize = `${baseFontSize * 1.2}px`;
+          }
+        });
+      }
+
+      tempContainer.appendChild(clonedPreview);
+      document.body.appendChild(tempContainer);
+
+      // Attendre pour le rendu complet
+      await new Promise(resolve => setTimeout(resolve, 150));
+
+      // Capturer avec dom-to-image-more
+      let dataUrl: string;
+
+      if (exportSettings.fileType === 'jpeg') {
+        dataUrl = await domtoimage.toJpeg(tempContainer, {
+          width: width,
+          height: height,
+          scale: scale,
+          quality: 0.95,
+          bgcolor: '#ffffff'
+        });
+      } else {
+        dataUrl = await domtoimage.toPng(tempContainer, {
+          width: width,
+          height: height,
+          scale: scale
+        });
+      }
+
+      // Nettoyer
+      document.body.removeChild(tempContainer);
+
+      // Telecharger l'image
+      const link = document.createElement('a');
+      const qualitySuffix = quality === '2x' ? '@2x' : '';
+      link.download = `prompt-${exportSettings.format}${qualitySuffix}-${Date.now()}.${exportSettings.fileType}`;
+      link.href = dataUrl;
+      link.click();
+
     } catch (error) {
       console.error('Erreur lors de l\'export:', error);
       alert('Une erreur est survenue lors de l\'export. Veuillez reessayer.');
     }
-  };
-
-  const exportToImage9_16 = async (formatConfig: { value: string; label: string; width: number; height: number }) => {
-    // Creer un element temporaire optimise pour 9:16
-    const tempContainer = document.createElement('div');
-    tempContainer.style.position = 'fixed';
-    tempContainer.style.top = '-9999px';
-    tempContainer.style.left = '0';
-    tempContainer.style.width = `${formatConfig.width}px`;
-    tempContainer.style.height = `${formatConfig.height}px`;
-    tempContainer.style.backgroundColor = 'transparent';
-
-    // Cloner et optimiser le contenu pour 9:16
-    const clonedPreview = previewRef.current!.cloneNode(true) as HTMLElement;
-
-    // Card = 100% sans padding (pas de bord BG visible)
-    clonedPreview.style.width = `${formatConfig.width}px`;
-    clonedPreview.style.height = `${formatConfig.height}px`;
-    clonedPreview.style.padding = '0';
-    clonedPreview.style.display = 'flex';
-    clonedPreview.style.alignItems = 'stretch';
-    clonedPreview.style.justifyContent = 'stretch';
-
-    // Trouver et optimiser la card (100% de l'espace)
-    const card = clonedPreview.querySelector('[class*="rounded"]') as HTMLElement;
-    if (card) {
-      card.style.width = '100%';
-      card.style.height = '100%';
-      card.style.maxHeight = 'none';
-      card.style.borderRadius = '0'; // Pas de coins arrondis a l'export
-
-      // Optimiser le contenu de la card
-      const cardContent = card.querySelector('[class*="p-"]') as HTMLElement;
-      if (cardContent) {
-        cardContent.style.padding = '80px 60px';
-        cardContent.style.height = '100%';
-        cardContent.style.display = 'flex';
-        cardContent.style.alignItems = 'center';
-        cardContent.style.justifyContent = 'center';
-      }
-
-      // Optimiser le texte
-      const textContainer = card.querySelector('div[class*="font-"]') as HTMLElement;
-      if (textContainer) {
-        textContainer.style.fontSize = '44px';
-        textContainer.style.lineHeight = '1.5';
-        textContainer.style.width = '100%';
-
-        // Optimiser les elements specifiques
-        const elements = textContainer.querySelectorAll('*');
-        elements.forEach(el => {
-          const element = el as HTMLElement;
-          if (element.tagName === 'H1') {
-            element.style.fontSize = '66px';
-            element.style.marginBottom = '20px';
-          } else if (element.tagName === 'H2') {
-            element.style.fontSize = '55px';
-            element.style.marginBottom = '16px';
-          } else if (element.tagName === 'H3') {
-            element.style.fontSize = '48px';
-            element.style.marginBottom = '12px';
-          } else {
-            element.style.fontSize = '44px';
-          }
-          element.style.lineHeight = '1.5';
-          element.style.width = '100%';
-          element.style.wordWrap = 'break-word';
-        });
-      }
-    }
-
-    tempContainer.appendChild(clonedPreview);
-    document.body.appendChild(tempContainer);
-
-    // Capturer avec html2canvas
-    const canvas = await html2canvas(tempContainer, {
-      width: formatConfig.width,
-      height: formatConfig.height,
-      scale: 1,
-      useCORS: true,
-      allowTaint: true,
-      backgroundColor: null,
-      logging: false
-    });
-
-    // Nettoyer
-    document.body.removeChild(tempContainer);
-
-    // Export direct
-    const mimeType = exportSettings.fileType === 'jpeg' ? 'image/jpeg' : 'image/png';
-    const quality = exportSettings.fileType === 'jpeg' ? 0.9 : undefined;
-
-    const link = document.createElement('a');
-    link.download = `prompt-${exportSettings.format}-${Date.now()}.${exportSettings.fileType}`;
-    link.href = canvas.toDataURL(mimeType, quality);
-    link.click();
-  };
-
-  const exportToImage16_9 = async (formatConfig: { value: string; label: string; width: number; height: number }) => {
-    // LOGIQUE SPECIFIQUE 16:9 - Export natif optimise
-    const tempContainer = document.createElement('div');
-    tempContainer.style.position = 'fixed';
-    tempContainer.style.top = '-9999px';
-    tempContainer.style.left = '0';
-    tempContainer.style.width = `${formatConfig.width}px`;
-    tempContainer.style.height = `${formatConfig.height}px`;
-    tempContainer.style.backgroundColor = 'transparent';
-
-    // Cloner et optimiser le contenu pour 16:9
-    const clonedPreview = previewRef.current!.cloneNode(true) as HTMLElement;
-
-    // Card = 100% sans padding (pas de bord BG visible)
-    clonedPreview.style.width = `${formatConfig.width}px`;
-    clonedPreview.style.height = `${formatConfig.height}px`;
-    clonedPreview.style.padding = '0';
-    clonedPreview.style.display = 'flex';
-    clonedPreview.style.alignItems = 'stretch';
-    clonedPreview.style.justifyContent = 'stretch';
-
-    // Trouver et optimiser la card (100% de l'espace)
-    const card = clonedPreview.querySelector('[class*="rounded"]') as HTMLElement;
-    if (card) {
-      card.style.width = '100%';
-      card.style.height = '100%';
-      card.style.maxHeight = 'none';
-      card.style.borderRadius = '0'; // Pas de coins arrondis a l'export
-
-      // Optimiser le contenu de la card
-      const cardContent = card.querySelector('[class*="p-"]') as HTMLElement;
-      if (cardContent) {
-        cardContent.style.padding = '60px 100px';
-        cardContent.style.height = '100%';
-        cardContent.style.display = 'flex';
-        cardContent.style.alignItems = 'center';
-        cardContent.style.justifyContent = 'center';
-      }
-
-      // Optimiser le texte pour 16:9
-      const textContainer = card.querySelector('div[class*="font-"]') as HTMLElement;
-      if (textContainer) {
-        textContainer.style.fontSize = '36px';
-        textContainer.style.lineHeight = '1.5';
-        textContainer.style.width = '100%';
-
-        // Optimiser les elements specifiques
-        const elements = textContainer.querySelectorAll('*');
-        elements.forEach(el => {
-          const element = el as HTMLElement;
-          if (element.tagName === 'H1') {
-            element.style.fontSize = '54px';
-            element.style.marginBottom = '16px';
-          } else if (element.tagName === 'H2') {
-            element.style.fontSize = '45px';
-            element.style.marginBottom = '12px';
-          } else if (element.tagName === 'H3') {
-            element.style.fontSize = '40px';
-            element.style.marginBottom = '10px';
-          } else {
-            element.style.fontSize = '36px';
-          }
-          element.style.lineHeight = '1.5';
-          element.style.width = '100%';
-          element.style.wordWrap = 'break-word';
-        });
-      }
-    }
-
-    tempContainer.appendChild(clonedPreview);
-    document.body.appendChild(tempContainer);
-
-    // Capturer avec html2canvas
-    const canvas = await html2canvas(tempContainer, {
-      width: formatConfig.width,
-      height: formatConfig.height,
-      scale: 1,
-      useCORS: true,
-      allowTaint: true,
-      backgroundColor: null,
-      logging: false
-    });
-
-    // Nettoyer
-    document.body.removeChild(tempContainer);
-
-    // Export direct
-    const mimeType = exportSettings.fileType === 'jpeg' ? 'image/jpeg' : 'image/png';
-    const quality = exportSettings.fileType === 'jpeg' ? 0.9 : undefined;
-
-    const link = document.createElement('a');
-    link.download = `prompt-${exportSettings.format}-${Date.now()}.${exportSettings.fileType}`;
-    link.href = canvas.toDataURL(mimeType, quality);
-    link.click();
   };
 
   if (!mounted) {
@@ -789,6 +802,7 @@ export default function PromptStyler() {
               placeholder="Ecrivez votre prompt ici..."
               value={promptText}
               onChange={(e) => setPromptText(e.target.value)}
+              onKeyDown={handleTextareaKeyDown}
               className="resize-none text-base h-full"
             />
           </div>
