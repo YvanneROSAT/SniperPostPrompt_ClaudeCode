@@ -4,6 +4,9 @@ import createNextIntlPlugin from 'next-intl/plugin';
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 const nextConfig: NextConfig = {
+  // Empêche « next dev » d'ajouter tout seul un bloc de consignes Next.js
+  // dans AGENTS.md : ce fichier est écrit à la main pour le projet.
+  agentRules: false,
   async headers() {
     return [
       {
